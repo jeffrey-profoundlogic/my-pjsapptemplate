@@ -1,0 +1,12 @@
+            PGM
+
+            DCL &SYSPATH *CHAR 32
+            DCL &JOBPATH *CHAR 32
+
+            RTVENVVAR  ENVVAR(JOBCLASSPATH) RTNVAL(&JOBPATH)
+
+            RTVENVVAR  ENVVAR(SYSCLASSPATH) RTNVAL(&SYSPATH) +
+                          LEVEL(*SYS)
+            DMPCLPGM
+
+            ENDPGM

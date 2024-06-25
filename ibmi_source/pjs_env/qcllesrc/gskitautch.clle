@@ -1,0 +1,32 @@
+             PGM        PARM(&UPROFILE)
+
+             DCL        VAR(&UPROFILE) TYPE(*CHAR) STG(*AUTO) LEN(10)
+
+/* GRANTING ORDINARY USERS PERMISSION TO RUN SSL APPLICATIONS             */
+/*---------------------------------------------------------------------   */
+/* When you get an error using SSL like the following:                    */
+/*  "(GSKit) Access to the key database is not allowed"                   */
+/* This is because the end-user doesn't have authority to the files       */
+/* in the IFS needed by the Global Secure Toolkit (GSKit) in the          */
+/* operating system. This is the component in the OS used for SSL/TLS.    */
+/*                                                                        */
+/* To solve that problem, grant authority as follows...                   */
+/* In this example, a group named &UPROFILE is being given access to the    */
+/* files.  (Change &UPROFILE to the proper group or userid when you do it)  */
+
+             CHGAUT     OBJ('/QIBM/UserData') USER(&UPROFILE) +
+                          DTAAUT(*RX)
+             CHGAUT     OBJ('/QIBM/UserData/ICSS') USER(&UPROFILE) +
+                          DTAAUT(*RX)
+             CHGAUT     OBJ('/QIBM/UserData/ICSS/CERT') +
+                          USER(&UPROFILE) DTAAUT(*RX)
+             CHGAUT     OBJ('/QIBM/UserData/ICSS/CERT/SERVER') +
+                          USER(&UPROFILE) DTAAUT(*RX)
+             CHGAUT     +
+                          OBJ('/QIBM/UserData/ICSS/CERT/SERVER/DEFAUL+
+                          T.KDB') USER(&UPROFILE) DTAAUT(*R)
+             CHGAUT     +
+                          OBJ('/QIBM/UserData/ICSS/CERT/SERVER/DEFAUL+
+                          T.RDB') USER(&UPROFILE) DTAAUT(*R)
+
+             ENDPGM

@@ -1,0 +1,751 @@
+{
+  "text": "",
+  "logic": {
+    "load local apiurl button click": {
+      "steps": [
+        {
+          "text": "Set widget value",
+          "answers": {
+            "plugin": "Client-side:set-widget-value",
+            "widget": "tbURL",
+            "preview": "",
+            "value": "\"/run/papisamples/wsapi/apisample\"",
+            "comment": "Sets the URL to the API file path in case it is removed for reasons unknown "
+          }
+        }
+      ]
+    },
+    "get button click": {
+      "steps": [
+        {
+          "text": "Retrieve API URL",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbURL",
+            "preview": "",
+            "client_variable": "URL",
+            "comment": ""
+          }
+        },
+        {
+          "text": "Retrieve Row ID",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbRowID",
+            "preview": "",
+            "client_variable": "rowID",
+            "comment": ""
+          }
+        },
+        {
+          "text": "GET API request",
+          "answers": {
+            "plugin": "Client-side:client-side-code",
+            "code": "/**\r\n * Take the client-side variables set in previous steps, and request for one or more rows.\r\n */\r\nconst requestParms = {\r\n  method: \"GET\",\r\n  url: URL,\r\n  headers: { \"content-type\": \"text/HTML\" },\r\n  suppressAlert: true,\r\n  params: {\r\n    rowid: rowID\r\n  },\r\n  handler: function(response) {\r\n    if (response.error) {\r\n      pui.set(\"errorMsg\", response.error);\r\n      pui.set(\"tbResult\", \"\");\r\n    }\r\n    else {\r\n      pui.set(\"errorMsg\", \"\");\r\n      pui.set(\"tbResult\", JSON.stringify(response.result, null, 2));\r\n      // Populate the grid by calling methods that are defined in the screen's \"onload\" event.\r\n      papisamples.clearGrid();\r\n      papisamples.fillGrid(response.result);\r\n    }\r\n  }\r\n};\r\n\r\n// Set request window with generated API call:\r\npui.set(\"tbRequest\", `${requestParms.method} - ${requestParms.url}\r\nrowid: ${requestParms.params.rowid}`);\r\n// Send the request.\r\najaxJSON(requestParms);\r\n",
+            "comment": "Calls the Sample API file and retrieve data from the CSV file"
+          }
+        }
+      ]
+    },
+    "post button click": {
+      "steps": [
+        {
+          "text": "Retrieve API URL",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbURL",
+            "preview": "",
+            "client_variable": "URL",
+            "comment": ""
+          }
+        },
+        {
+          "text": "Retrieve Row ID",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbRowID",
+            "preview": "",
+            "client_variable": "rowID",
+            "comment": ""
+          }
+        },
+        {
+          "text": "POST API request",
+          "answers": {
+            "plugin": "Client-side:client-side-code",
+            "code": "/**\r\n * POST Button Clicked.\r\n * Client-side code, runs in the browser. This step gets wrapped inside a function that the client-side framework calls\r\n * when a button is clicked.\r\n */\r\nconst postData = {\r\n  rowid: rowID,\r\n  pname: getElementValue(\"tbProdName\"),\r\n  price: getElementValue(\"tbPrice\"),\r\n  quantity: getElementValue(\"tbQuantity\")\r\n};\r\n\r\nconst requestParms = {\r\n  method: \"POST\",\r\n  url: URL,\r\n  headers: { \"content-type\": \"application/json\" },\r\n  suppressAlert: true,\r\n  postData: JSON.stringify(postData),\r\n  // Handle a response for the POST operation, which may have added a record to the grid.\r\n  // There are currently no client-side APIs to add grid records; thus, the page must be reloaded\r\n  // before new records can be seen. Store the response data into widgets that get submitted,\r\n  // and then the reloaded page will have the results and or message.\r\n  handler: function(response) {\r\n    pui.set(\"tbResult\", \"\");\r\n    pui.set(\"message\", \"\");\r\n    pui.set(\"txtPostResults\", \"\");\r\n    pui.set(\"txtPostMessage\", \"\");\r\n    if (typeof response.result === \"object\" && response.result !== null) {\r\n      // Store the result and message into widgets that get submitted.\r\n      pui.set(\"txtPostResults\", JSON.stringify(response.result, null, 2));\r\n      if (typeof response.msg === \"string\" && response.msg.length > 0) {\r\n        pui.set(\"txtPostMessage\", response.msg);\r\n      }\r\n      // Submit the screen to reload it.\r\n      pui.click();\r\n    }\r\n    else if (response.error) {\r\n      // Show the error message\r\n      pui.set(\"message\", response.error);\r\n    }\r\n    else {\r\n      // Show the unexpected response.\r\n      pui.set(\"message\", \"Unexpected response\");\r\n      pui.set(\"tbResult\", JSON.stringify(response, null, 2));\r\n    }\r\n  }\r\n};\r\n\r\n// Set request window with generated API call:\r\npui.set(\"tbRequest\", `${requestParms.method} - ${requestParms.url}\r\nrowid: ${postData.rowid}\r\npname: ${postData.pname}\r\nprice: ${postData.price}\r\nquantity: ${postData.quantity}`);\r\n// Start the request.\r\najaxJSON(requestParms);\r\n",
+            "comment": "Calls the Sample API file and adds new data into the CSV file"
+          }
+        }
+      ]
+    },
+    "put button click": {
+      "steps": [
+        {
+          "text": "Retrieve API URL",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbURL",
+            "preview": "",
+            "client_variable": "URL",
+            "comment": ""
+          }
+        },
+        {
+          "text": "Retrieve Row ID",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbRowID",
+            "preview": "",
+            "client_variable": "rowID",
+            "comment": ""
+          }
+        },
+        {
+          "text": "PUT API request",
+          "answers": {
+            "plugin": "Client-side:client-side-code",
+            "code": "/**\r\n * PUT Button Clicked.\r\n * Client-side code, runs in the browser. This step gets wrapped inside a function that the client-side framework calls\r\n * when a button is clicked.\r\n */\r\nconst requestParms = {\r\n  method: \"PUT\",\r\n  url: URL,\r\n  headers: { \"content-type\": \"text/HTML\" },\r\n  suppressAlert: true,\r\n  params: {\r\n    rowid: rowID,\r\n    pname: getElementValue(\"tbProdName\"),\r\n    price: getElementValue(\"tbPrice\"),\r\n    quantity: getElementValue(\"tbQuantity\")\r\n  },\r\n  // The handler is defined in the screen's \"onload\" event.\r\n  handler: papisamples.handleJSONResponse\r\n};\r\n\r\n// Set request window with generated API call:\r\npui.set(\"tbRequest\", `${requestParms.method} - ${requestParms.url}\r\nrowid: ${requestParms.params.rowid}\r\npname: ${requestParms.params.pname}\r\nprice: ${requestParms.params.price}\r\nquantity: ${requestParms.params.quantity}`);\r\n// Start the request.\r\najaxJSON(requestParms);\r\n",
+            "comment": "Calls the Sample API file and updates data from a specific row in the CSV file"
+          }
+        }
+      ]
+    },
+    "delete button click": {
+      "steps": [
+        {
+          "text": "Retrieve API URL",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbURL",
+            "preview": "",
+            "client_variable": "URL",
+            "comment": ""
+          }
+        },
+        {
+          "text": "Retrieve Row ID",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbRowID",
+            "preview": "",
+            "client_variable": "rowID",
+            "comment": ""
+          }
+        },
+        {
+          "text": "Retrieve Product Name",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbProdName",
+            "preview": "",
+            "client_variable": "prodName",
+            "comment": ""
+          }
+        },
+        {
+          "text": "Retrieve Price",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbPrice",
+            "preview": "",
+            "client_variable": "prodPrice",
+            "comment": ""
+          }
+        },
+        {
+          "text": "Retrieve Quantity",
+          "answers": {
+            "plugin": "Client-side:retrieve-widget-value",
+            "widget": "tbQuantity",
+            "preview": "",
+            "client_variable": "pcount",
+            "comment": ""
+          }
+        },
+        {
+          "text": "DELETE API Request",
+          "answers": {
+            "plugin": "Client-side:client-side-code",
+            "code": "/**\r\n * Delete Button Clicked.\r\n * Client-side code, runs in the browser. This step gets wrapped inside a function that the client-side framework calls\r\n * when a button is clicked.\r\n */\r\n// Query comes from values in two other widgets.\r\n\r\n// Make the request and expect a JSON response.\r\nvar requestParms = {\r\n  method: \"DELETE\",\r\n  url: URL,\r\n  headers: {\"content-type\": 'text/HTML'},\r\n  suppressAlert: true,\r\n  params: {\r\n    rowid: rowID,\r\n    pname: prodName,\r\n    price: prodPrice,\r\n    quantity: pcount\r\n  },\r\n  // The handler is defined in the screen's \"onload\" event.\r\n  handler: papisamples.handleJSONResponse\r\n};\r\n\r\n// Set request window with generated API call:\r\npui.set(\"tbRequest\",`${requestParms.method} - ${requestParms.url}\r\nrowid: ${requestParms.params.rowid}\r\npname: ${requestParms.params.pname}\r\nprice: ${requestParms.params.price}\r\nquantity: ${requestParms.params.quantity}`);\r\n// Start the request.\r\najaxJSON(requestParms);\r\n",
+            "comment": "Calls the Sample API file and deletes specified row data from the CSV file"
+          }
+        }
+      ]
+    }
+  },
+  "formats": [
+    {
+      "screen": {
+        "record format name": "mainscreen",
+        "onload": "if (typeof papisamples !== \"object\" || papisamples === null){\n  papisamples = {};\n}\n\n/**\n * Clear the grid records.\n * Expect this code to be initiated by clicking on GET, POST, PUT, or DELETE buttons.\n */\npapisamples.clearGrid = function(){\n  var gridUI = getObj(\"grShopUI\");\n  var i, count = gridUI.grid.getRecordCount();\n\n  for (i = 1; i <= count; i++){\n      gridUI.grid.setDataValue(i,\"ID\",\" \");\n      gridUI.grid.setDataValue(i,\"Name\",\" \");\n      gridUI.grid.setDataValue(i,\"Price\",\" \");\n      gridUI.grid.setDataValue(i,\"Quantity\",\" \");\n  }\n};\n\n/**\n * Populate the grid with data from the parameter object.\n * Expect this code to be initiated by clicking on GET, POST, PUT, or DELETE buttons.\n * @param {Object} result  An array of objects or a single record object.\n */\npapisamples.fillGrid = function(result){\n  var gridUI = getObj(\"grShopUI\");\n\n  if (Array.isArray(result)){\n    result.forEach(function(item,index){\n      gridUI.grid.setDataValue(index+1,\"ID\",item.ID);\n      gridUI.grid.setDataValue(index+1,\"Name\",item.Name);\n      gridUI.grid.setDataValue(index+1,\"Price\",item.Price);\n      gridUI.grid.setDataValue(index+1,\"Quantity\",item.Quantity);    \n    });\n  }\n  else if (typeof result === \"object\" && result !== null){\n    gridUI.grid.setDataValue(1,\"ID\",result.ID);\n    gridUI.grid.setDataValue(1,\"Name\",result.Name);\n    gridUI.grid.setDataValue(1,\"Price\",result.Price);\n    gridUI.grid.setDataValue(1,\"Quantity\",result.Quantity);\n  }\n};\n\n/**\n * Define a handler for calls to ajaxJSON when the expected response contains\n * either an error or a result property.\n * Set either the error field or the result field, and populate the grid.\n */\npapisamples.handleJSONResponse = function(response){\n  pui.set(\"message\", \"\");\n  pui.set(\"tbResult\", \"\");\n  if (typeof response.result === \"object\" && response.result !== null){\n    // Show the result\n    pui.set(\"tbResult\", JSON.stringify(response.result, null, 2));\n    if (typeof response.msg === \"string\" && response.msg.length > 0){\n      pui.set(\"message\", response.msg);\n    }\n    papisamples.clearGrid();\n    papisamples.fillGrid(response.result);\n  }\n  else if (response.error) {\n    // Show the error message\n    pui.set(\"message\", response.error);\n  }\n  else {\n    pui.set(\"message\", \"Unexpected response\");\n    pui.set(\"tbResult\", JSON.stringify(response, null, 2));\n  }\n};\n"
+      },
+      "items": [
+        {
+          "id": "Layout1",
+          "field type": "layout",
+          "css class": "blueprint-panel",
+          "left": "calc(50% - 417px)",
+          "top": "10px",
+          "template": "css panel",
+          "header text": "API Sample App",
+          "header theme": "blueprint-dark-header",
+          "body theme": "blueprint-white-body",
+          "height": "940px",
+          "width": "835px",
+          "z index": "8",
+          "css class 2": "blueprint-defaults"
+        },
+        {
+          "id": "GraphicButton1",
+          "field type": "graphic button",
+          "css class": "pui-solid-button-no",
+          "left": "calc(50% + 375px)",
+          "top": "15px",
+          "width": "25px",
+          "icon position": "left",
+          "css class 2": "blueprint-defaults",
+          "icon": "material:clear",
+          "height": "25px",
+          "response": {
+            "fieldName": "exit",
+            "customTrue": "",
+            "customFalse": "",
+            "dataType": "indicator",
+            "formatting": "Indicator",
+            "indFormat": "1 / 0"
+          }
+        },
+        {
+          "id": "tbRequest",
+          "field type": "html container",
+          "left": "150px",
+          "top": "595px",
+          "width": "660px",
+          "height": "90px",
+          "html": {
+            "fieldName": "tbRequest",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "string",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[tbRequest]"
+          },
+          "inline style": "border: solid 1px #ccc;",
+          "white space": "pre",
+          "overflow y": "auto",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "btGet",
+          "field type": "button",
+          "css class": "button",
+          "value": "GET",
+          "left": "20px",
+          "top": "445px",
+          "width": "115px",
+          "height": "25px",
+          "onclick": {
+            "routine": "get button click",
+            "designValue": "get button click"
+          },
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "tbPost",
+          "field type": "button",
+          "css class": "button",
+          "value": "POST",
+          "left": "20px",
+          "top": "485px",
+          "height": "25px",
+          "width": "115px",
+          "onclick": {
+            "routine": "post button click",
+            "designValue": "post button click"
+          },
+          "description": "Append a record",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "tbPut",
+          "field type": "button",
+          "css class": "button",
+          "value": "PUT",
+          "left": "20px",
+          "top": "525px",
+          "height": "25px",
+          "width": "115px",
+          "onclick": {
+            "routine": "put button click",
+            "designValue": "put button click"
+          },
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "tbDelete",
+          "field type": "button",
+          "css class": "button",
+          "value": "DELETE",
+          "left": "20px",
+          "top": "565px",
+          "height": "25px",
+          "width": "115px",
+          "onclick": {
+            "routine": "delete button click",
+            "designValue": "delete button click"
+          },
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "lb2",
+          "field type": "output field",
+          "css class": "label",
+          "value": "Request Query Generated:",
+          "left": "150px",
+          "top": "570px",
+          "width": "185px",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "tbURL",
+          "field type": "textbox",
+          "css class": "input",
+          "left": "150px",
+          "top": "445px",
+          "width": "665px",
+          "height": "25px",
+          "value": {
+            "fieldName": "tbURL",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "string",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[tbURL]"
+          },
+          "read only": "true",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "lb1",
+          "field type": "output field",
+          "css class": "label",
+          "value": "Request URL:",
+          "left": "150px",
+          "top": "415px",
+          "width": "95px",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "divAPIRows",
+          "field type": "layout",
+          "left": "150px",
+          "top": "480px",
+          "template": "simple container",
+          "height": "85px",
+          "width": "670px",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "tbLocalURL",
+          "field type": "button",
+          "css class": "button",
+          "value": "Load local API URL",
+          "left": "625px",
+          "top": "410px",
+          "height": "25px",
+          "width": "190px",
+          "onclick": {
+            "routine": "load local apiurl button click",
+            "designValue": "load local apiurl button click"
+          },
+          "visibility": "hidden",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "lb8",
+          "field type": "output field",
+          "css class": "label",
+          "value": "Result:",
+          "left": "15px",
+          "top": "720px",
+          "width": "50px",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "tbResult",
+          "field type": "html container",
+          "left": "15px",
+          "top": "750px",
+          "html": {
+            "fieldName": "tbResults",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "string",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[tbResults]"
+          },
+          "white space": "pre",
+          "width": "795px",
+          "height": "135px",
+          "overflow y": "auto",
+          "font family": "Monospace",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "grShopUI",
+          "field type": "grid",
+          "css class": "crystal-grid",
+          "left": "15px",
+          "top": "15px",
+          "number of rows": "14",
+          "number of columns": "4",
+          "column widths": "103,386,176,137",
+          "column headings": "ID,Product Name,Price,Quantity",
+          "header height": "28",
+          "row height": "26",
+          "height": "366px",
+          "width": "803px",
+          "record format name": "grHobbyShop",
+          "scrollbar": "sliding",
+          "onrowclick": "let grid = getObj(\"grShopUI\").grid;\n\n// Set the value of the textboxes in the form below the grid with the record data.\npui.set(\"tbRowID\", grid.getDataValue(row, \"ID\"));\npui.set(\"tbPrice\", grid.getDataValue(row, \"Price\"));\npui.set(\"tbProdName\", grid.getDataValue(row, \"Name\"));\npui.set(\"tbQuantity\", grid.getDataValue(row, \"Quantity\"));\n",
+          "row selection": "single",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "labelMsg",
+          "field type": "output field",
+          "css class": "label",
+          "value": "Message:",
+          "left": "15px",
+          "top": "690px",
+          "width": "110px",
+          "text align": "left",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "message",
+          "field type": "output field",
+          "value": {
+            "fieldName": "message",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "string",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[message]"
+          },
+          "left": "140px",
+          "top": "690px",
+          "width": "660px",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "txtPostMessage",
+          "field type": "textbox",
+          "css class": "input",
+          "value": {
+            "fieldName": "postMessage",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "string",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[postMessage]"
+          },
+          "left": "735px",
+          "top": "695px",
+          "width": "70px",
+          "description": "Needed so the message from POST persists after a screen submit",
+          "visibility": "hidden",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "txtPostResults",
+          "field type": "textbox",
+          "css class": "input",
+          "value": {
+            "fieldName": "postResults",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "string",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[postResults]"
+          },
+          "left": "735px",
+          "top": "715px",
+          "description": "Needed so the results from POST persists after a screen submit",
+          "visibility": "hidden",
+          "width": "80px",
+          "layout": "Layout1",
+          "container": "1"
+        },
+        {
+          "id": "tbRowID",
+          "field type": "textbox",
+          "css class": "input",
+          "left": "100px",
+          "top": "15px",
+          "width": "130px",
+          "height": "20px",
+          "value": {
+            "fieldName": "rowID",
+            "dataLength": "25",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "varchar",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[rowID]"
+          },
+          "layout": "divAPIRows",
+          "container": "1"
+        },
+        {
+          "id": "lb3",
+          "field type": "output field",
+          "css class": "label",
+          "value": "Row ID:",
+          "left": "-60px",
+          "top": "15px",
+          "width": "150px",
+          "layout": "divAPIRows",
+          "container": "1"
+        },
+        {
+          "id": "tbProdName",
+          "field type": "textbox",
+          "css class": "input",
+          "left": "380px",
+          "top": "15px",
+          "width": "270px",
+          "height": "20px",
+          "value": {
+            "fieldName": "pname",
+            "dataLength": "25",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "varchar",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[pname]"
+          },
+          "layout": "divAPIRows",
+          "container": "1"
+        },
+        {
+          "id": "lb4",
+          "field type": "output field",
+          "css class": "label",
+          "value": "Product Name:",
+          "left": "255px",
+          "top": "15px",
+          "width": "110px",
+          "layout": "divAPIRows",
+          "container": "1"
+        },
+        {
+          "id": "tbPrice",
+          "field type": "textbox",
+          "css class": "input",
+          "left": "100px",
+          "top": "45px",
+          "height": "20px",
+          "width": "130px",
+          "value": {
+            "fieldName": "pprice",
+            "dataLength": "10",
+            "decPos": "0",
+            "numSep": "false",
+            "zeroBalance": "false",
+            "numBlankFill": "false",
+            "zeroFill": "false",
+            "noExtraSpaces": "false",
+            "curSym": "",
+            "dataType": "zoned",
+            "formatting": "Number",
+            "negNum": "999.00",
+            "units": "",
+            "designValue": "[pprice]"
+          },
+          "layout": "divAPIRows",
+          "container": "1"
+        },
+        {
+          "id": "lb7",
+          "field type": "output field",
+          "css class": "label",
+          "value": "Price:",
+          "left": "-60px",
+          "top": "45px",
+          "width": "150px",
+          "layout": "divAPIRows",
+          "container": "1"
+        },
+        {
+          "id": "lb6",
+          "field type": "output field",
+          "css class": "label",
+          "value": "Quantity:",
+          "left": "260px",
+          "top": "45px",
+          "width": "105px",
+          "layout": "divAPIRows",
+          "container": "1"
+        },
+        {
+          "id": "tbQuantity",
+          "field type": "textbox",
+          "css class": "input",
+          "left": "380px",
+          "top": "45px",
+          "height": "20px",
+          "width": "130px",
+          "value": {
+            "fieldName": "pcount",
+            "dataLength": "25",
+            "numSep": "false",
+            "zeroBalance": "false",
+            "numBlankFill": "false",
+            "zeroFill": "false",
+            "noExtraSpaces": "false",
+            "curSym": "",
+            "dataType": "varchar",
+            "formatting": "Number",
+            "negNum": "999.00",
+            "units": "",
+            "designValue": "[pcount]"
+          },
+          "layout": "divAPIRows",
+          "container": "1"
+        },
+        {
+          "id": "opID",
+          "field type": "output field",
+          "css class": "outputField",
+          "value": {
+            "fieldName": "ID",
+            "dataLength": "25",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "varchar",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[ID]"
+          },
+          "left": "40px",
+          "top": "5px",
+          "grid": "grShopUI",
+          "column": "0"
+        },
+        {
+          "id": "opName",
+          "field type": "output field",
+          "css class": "outputField",
+          "value": {
+            "fieldName": "Name",
+            "dataLength": "25",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "varchar",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[Name]"
+          },
+          "left": "215px",
+          "top": "5px",
+          "grid": "grShopUI",
+          "column": "1"
+        },
+        {
+          "id": "opPrice",
+          "field type": "output field",
+          "css class": "outputField",
+          "value": {
+            "fieldName": "Price",
+            "dataLength": "10",
+            "decPos": "0",
+            "numSep": "false",
+            "zeroBalance": "false",
+            "numBlankFill": "false",
+            "zeroFill": "false",
+            "noExtraSpaces": "false",
+            "curSym": "$",
+            "dataType": "zoned",
+            "formatting": "Number",
+            "negNum": "-999.00",
+            "units": "",
+            "designValue": "[Price]"
+          },
+          "left": "30px",
+          "top": "5px",
+          "grid": "grShopUI",
+          "column": "2"
+        },
+        {
+          "id": "opCount",
+          "field type": "output field",
+          "css class": "outputField",
+          "value": {
+            "fieldName": "Quantity",
+            "dataLength": "25",
+            "trimLeading": "false",
+            "trimTrailing": "true",
+            "blankFill": "false",
+            "rjZeroFill": "false",
+            "dataType": "varchar",
+            "formatting": "Text",
+            "textTransform": "none",
+            "designValue": "[Quantity]"
+          },
+          "left": "30px",
+          "top": "5px",
+          "grid": "grShopUI",
+          "column": "3"
+        }
+      ]
+    }
+  ],
+  "keywords": [],
+  "long name aliases": true
+}

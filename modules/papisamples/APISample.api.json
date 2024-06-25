@@ -1,0 +1,313 @@
+{
+  "apiFileID": "52f8ae4f-486d-4b49-9106-650deff196b9",
+  "apiType": "rest",
+  "routes": [
+    {
+      "apiRouteID": "d9c2b7e1-13e4-4ce6-a088-f338d6a16371",
+      "name": "API Get",
+      "enableCors": true,
+      "summary": "Get operation for API Sample App",
+      "method": "get",
+      "inputs": [
+        {
+          "type": "string",
+          "from": "query",
+          "name": "rowid",
+          "description": "Retrieve the row ID provided. If 0 or empty, will retrieve all rows instead.",
+          "example": ""
+        }
+      ],
+      "path": "/apisample",
+      "subcategory": "",
+      "outputs": [
+        {
+          "type": "string",
+          "name": "msg"
+        },
+        {
+          "type": "string",
+          "name": "error"
+        },
+        {
+          "type": "object",
+          "name": "result",
+          "children": []
+        }
+      ],
+      "description": "Request a single row if an input parameter was specified. Otherwise, return all records.",
+      "steps": [
+        {
+          "text": "Get row ID",
+          "answers": {
+            "plugin": "Program Data:set-work-variable",
+            "work_variable": "queryID",
+            "value": "input[\"rowid\"]",
+            "comment": "retrieve row ID from query"
+          }
+        },
+        {
+          "text": "Send CSV data response",
+          "answers": {
+            "plugin": "Custom:code",
+            "custom-code": "/**\r\n * Return one or all records from a file, depending on arguments.\r\n */\r\nconst path = require(\"path\");\r\n\r\nconst f_fileRead = require(\"./readCSVFile.js\").fileRead;\r\nconst fHScsv = path.join(__dirname, \"hobbyshop.csv\");\r\n\r\ntry {\r\n  // define the file to be updated\r\n  var iLength = iRowID = 0;\r\n  let fileData = await f_fileRead(fHScsv);\r\n\r\n  iLength = fileData.length;      // get the current file length\r\n  iRowID = parseInt(queryID, 10); // try to get the data passed from the parameters  \r\n\r\n  // No row ID provided; read the whole file\r\n  if (isNaN(iRowID) || iRowID === 0) {\r\n    fileData = fileData.data;\r\n    output[\"result\"] = fileData;\r\n    output[\"msg\"] = \"All records returned\";\r\n  }\r\n  // check if the ID provided is available in the file's rows - reject if it doesn't\r\n  else if((iRowID <= 0) || (iRowID > iLength)){\r\n    output[\"error\"] = 'Error: Row ID ' + iRowID + ' does not exist';\r\n  }\r\n  // Respond with just a single row from the file.\r\n  else {\r\n    fileData = fileData.data[iRowID - 1];\r\n    output[\"result\"] = fileData;\r\n    output[\"msg\"] = \"One record returned\";\r\n  }\r\n}\r\ncatch (err){\r\n  output[\"error\"] = String(err);\r\n}",
+            "comment": "READ - Retrieve a line of data from the CSV using the rowid passed. If the rowid is 0 or empty, all rows will be retrieved."
+          }
+        }
+      ]
+    },
+    {
+      "apiRouteID": "7a90b4ad-baff-4796-9e40-7af86efb1b91",
+      "name": "API Post",
+      "enableCors": true,
+      "summary": "Post operation for API Sample App",
+      "method": "post",
+      "inputs": [
+        {
+          "type": "string",
+          "from": "body",
+          "name": "rowid",
+          "description": "Retrieve the row ID provided. If 0 or empty, will retrieve all rows instead.",
+          "example": ""
+        },
+        {
+          "type": "string",
+          "from": "body",
+          "name": "pname",
+          "description": "product name of item to be added"
+        },
+        {
+          "type": "integer",
+          "from": "body",
+          "name": "price",
+          "description": "price of item to be added",
+          "example": ""
+        },
+        {
+          "type": "integer",
+          "from": "body",
+          "name": "quantity",
+          "description": "quantity of item to be added",
+          "example": ""
+        }
+      ],
+      "path": "/apisample",
+      "subcategory": "",
+      "outputs": [
+        {
+          "type": "string",
+          "name": "msg",
+          "description": "Message about the operation"
+        },
+        {
+          "type": "string",
+          "name": "error"
+        },
+        {
+          "type": "object",
+          "name": "result",
+          "description": "The file after the POST operation succeeded",
+          "children": []
+        }
+      ],
+      "description": "Add a new row to the end of the file.",
+      "steps": [
+        {
+          "text": "Get Row ID",
+          "answers": {
+            "plugin": "Program Data:set-work-variable",
+            "work_variable": "rowID",
+            "value": "input[\"rowid\"]",
+            "comment": "retrieve row ID from query"
+          }
+        },
+        {
+          "text": "Get Product Name",
+          "answers": {
+            "plugin": "Program Data:set-work-variable",
+            "work_variable": "prodName",
+            "value": "input[\"pname\"]",
+            "comment": "get product name"
+          }
+        },
+        {
+          "text": "Get Product Price",
+          "answers": {
+            "plugin": "Program Data:set-work-variable",
+            "work_variable": "prodPrice",
+            "value": "input[\"price\"]",
+            "comment": "get product price"
+          }
+        },
+        {
+          "text": "Get Product Quantity",
+          "answers": {
+            "plugin": "Program Data:set-work-variable",
+            "work_variable": "prodCount",
+            "value": "input[\"quantity\"]",
+            "comment": "get product quantity"
+          }
+        },
+        {
+          "text": "Record new entry onto CSV",
+          "answers": {
+            "plugin": "Custom:code",
+            "custom-code": "/**\r\n * API: post.\r\n * Add a new row to the end of CSV file.\r\n */\r\nconst path = require(\"path\");\r\nconst f_fileRead = require(\"./readCSVFile.js\").fileRead;\r\nconst f_appendFile = require(\"fs\").appendFile;\r\nconst fHScsv = path.join(__dirname, \"hobbyshop.csv\");\r\n\r\ntry {\r\n  // define the file to be updated\r\n  let iLine = 1; // File ID entries will start at One\r\n  const pr_fileDat = await f_fileRead(fHScsv);\r\n  // get the current line and length of the CSV file\r\n  iLine = pr_fileDat.length;\r\n\r\n  // Use the values from the previous low-code steps. Values\r\n  prodName = prodName.trim();\r\n\r\n  strpost = prodName + \",\" + prodPrice + \",\" + prodCount;\r\n  if (prodName.length < 1) {\r\n    // send the error //return an error if data passed is empty\r\n    output[\"error\"] = \"Error: Product Name missing\";\r\n  }\r\n  else if (prodPrice == \"\") {\r\n    // send the error //return an error if data passed is empty\r\n    output[\"error\"] = \"Error: Product Price missing\";\r\n  }\r\n  else if (prodCount == \"\") {\r\n    // send the error //return an error if data passed is empty\r\n    output[\"error\"] = \"Error: Product Count missing\";\r\n  }\r\n  else {\r\n    // iLine will serve as the ID of the entry to be added\r\n    iLine += 1;\r\n    // Wrap the asynchronous append operation in a promise so that it can be awaited, and code run in sequence.\r\n    const message = await new Promise((resolve, reject) => {\r\n      const entryStr = \"\\n\" + iLine + \",\" + strpost;\r\n      f_appendFile(fHScsv, entryStr, (err) => {\r\n        if (err) reject(new Error('File not found - creating file instead: \" + fHScsv + \"'));\r\n        else resolve(\"Record added to end of file: \" + iLine + \",\" + strpost);\r\n      });\r\n    });\r\n\r\n    output[\"msg\"] = message;\r\n    const dataObj = await f_fileRead(fHScsv); // re-read the file to get the updated data.\r\n    output[\"result\"] = dataObj.data;\r\n  }\r\n}\r\ncatch (err) {\r\n  output[\"error\"] = String(err);\r\n}\r\n",
+            "comment": "CREATE - Add new CSV row entry based on data passed. Returns an error if at least the name, price or quantity fields are empty."
+          }
+        }
+      ]
+    },
+    {
+      "apiRouteID": "76f3ac1c-e279-4806-a451-aa2db4bc6e98",
+      "name": "API Put",
+      "enableCors": true,
+      "summary": "Put operation for API Sample App",
+      "method": "put",
+      "inputs": [
+        {
+          "type": "string",
+          "from": "query",
+          "name": "rowid",
+          "description": "Retrieve the row ID provided. If 0 or empty, will retrieve all rows instead.",
+          "example": ""
+        },
+        {
+          "type": "string",
+          "from": "query",
+          "name": "pname",
+          "example": "",
+          "description": "item name to be updated to this value"
+        },
+        {
+          "type": "integer",
+          "from": "query",
+          "name": "price",
+          "example": "",
+          "description": "item price to be updated to this value"
+        },
+        {
+          "type": "integer",
+          "from": "query",
+          "name": "quantity",
+          "description": "item quantity to be updated to this value",
+          "example": ""
+        }
+      ],
+      "path": "/apisample",
+      "subcategory": "",
+      "outputs": [
+        {
+          "type": "string",
+          "name": "msg"
+        },
+        {
+          "type": "string",
+          "name": "error"
+        },
+        {
+          "type": "object",
+          "name": "result"
+        }
+      ],
+      "steps": [
+        {
+          "text": "Get Row ID",
+          "answers": {
+            "plugin": "Program Data:set-work-variable",
+            "work_variable": "queryID",
+            "value": "input[\"rowid\"]",
+            "comment": "retrieve row ID from query"
+          }
+        },
+        {
+          "text": "Get Product Name",
+          "answers": {
+            "plugin": "Program Data:set-work-variable",
+            "work_variable": "prodName",
+            "value": "input[\"pname\"]",
+            "comment": "Get Product Name"
+          }
+        },
+        {
+          "text": "Get Product Price",
+          "answers": {
+            "plugin": "Program Data:set-work-variable",
+            "work_variable": "prodPrice",
+            "value": "input[\"price\"]",
+            "comment": "Get Product Price"
+          }
+        },
+        {
+          "text": "Get Product Quantity",
+          "answers": {
+            "plugin": "Program Data:set-work-variable",
+            "work_variable": "prodCount",
+            "value": "input[\"quantity\"]",
+            "comment": "Get Product Quantity"
+          }
+        },
+        {
+          "text": "Update CSV data",
+          "answers": {
+            "plugin": "Custom:code",
+            "custom-code": "/**\r\n * API: PUT\r\n * Update one record in the file.\r\n */\r\nconst path = require(\"path\");\r\nconst f_fileRead = require(\"./readCSVFile.js\").fileRead;\r\nconst f_fileUpdate = require(\"./readCSVFile.js\").fileUpdate;\r\nconst fHScsv = path.join(__dirname, \"hobbyshop.csv\");\r\n\r\ntry {\r\n  // define the file to be updated\r\n  let strpost = \"-\";\r\n  let iLine = iID = 1; // File ID entries will start at One\r\n  let iLineData = \"\";\r\n  // Read the file to get the number of lines in it.\r\n  const pr_fileDat = await f_fileRead(fHScsv);\r\n\r\n  iID = parseInt(queryID, 10);\r\n\r\n  // get the current line and length of the API file\r\n  iLine = pr_fileDat.length;\r\n  // check if the ID provided is available in the file's rows - reject if it doesn't\r\n  if (isNaN(iID)) {\r\n    output[\"error\"] = \"Please specify a Row ID to update.\";\r\n  }\r\n  else if ((iID <= 0) || (iID > iLine)) {\r\n    output[\"error\"] = \"Error: Row ID \" + iID + \" does not exist\";\r\n  }\r\n  else {\r\n    // get the current line's data & store into an array\r\n    iLineData = await f_fileRead(fHScsv, iID);\r\n    const arrData = [iLineData.data[0].ID, iLineData.data[0].Name, iLineData.data[0].Price, iLineData.data[0].Quantity];\r\n\r\n    // remove the first entry since the row ID is not needed\r\n    arrData.shift();\r\n\r\n    // check if query entries are not empty, then replace those rows:\r\n    if (prodName != \"\") arrData[0] = prodName;\r\n    if (prodPrice != \"\") arrData[1] = prodPrice;\r\n    if (prodCount != \"\") arrData[2] = prodCount;\r\n\r\n    if (prodName.length === 0 && prodPrice.length === 0 && prodCount.length === 0) {\r\n      output[\"error\"] = \"Please specify a name, price, or quantity to update.\";\r\n    }\r\n    else {\r\n      strpost = arrData.toString();\r\n\r\n      // Row ID exists - get a string of the file contents with the specified row updated.\r\n      output[\"msg\"] = await f_fileUpdate(fHScsv, iID, strpost);\r\n\r\n      // Fetch the file contents and place them in the output data.\r\n      const dataObj = await f_fileRead(fHScsv, 0);\r\n      output[\"result\"] = dataObj.data;\r\n    }\r\n  }\r\n}\r\ncatch (err) {\r\n  output[\"error\"] = String(err);\r\n}\r\n",
+            "comment": "UPDATE - Update CSV row data based on row ID and data passed. Returns an error if the row ID does not exist on the file or is not a number."
+          }
+        }
+      ]
+    },
+    {
+      "apiRouteID": "40eeece8-f5d1-4331-83b0-7693ad0a286d",
+      "name": "API Delete",
+      "enableCors": true,
+      "summary": "Delete operation for API Sample App",
+      "method": "delete",
+      "inputs": [
+        {
+          "type": "string",
+          "from": "query",
+          "name": "rowid",
+          "description": "Delete the row ID provided. If 0 or empty, will return an error instead.",
+          "example": ""
+        }
+      ],
+      "path": "/apisample",
+      "subcategory": "",
+      "outputs": [
+        {
+          "type": "string",
+          "name": "msg",
+          "description": "message describing the APIs response"
+        },
+        {
+          "type": "string",
+          "name": "error"
+        },
+        {
+          "type": "object",
+          "name": "result",
+          "description": "The records from the file after the row was deleted."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Get Row ID",
+          "answers": {
+            "plugin": "Program Data:set-work-variable",
+            "work_variable": "queryID",
+            "value": "input[\"rowid\"]",
+            "comment": "retrieve row ID from query"
+          }
+        },
+        {
+          "text": "Delete entry from CSV",
+          "answers": {
+            "plugin": "Custom:code",
+            "custom-code": "/**\r\n * API: DELETE\r\n * Delete a record from the file.\r\n */\r\nconst path = require(\"path\");\r\nconst f_fileRead = require(\"./readCSVFile.js\").fileRead;\r\nconst f_delete = require(\"./readCSVFile.js\").lineDelete;\r\nconst fHScsv = path.join(__dirname, \"hobbyshop.csv\");\r\n\r\ntry {\r\n  let iLength = iID = 1; // File ID entries will start at One\r\n\r\n  const fileData = await f_fileRead(fHScsv);\r\n  // Get the current line and length of the API file.\r\n  iLength = fileData.length;\r\n\r\n  iID = parseInt(queryID, 10); // params from post data is sent as URL query\r\n\r\n  // Check if the ID provided is available in the file's rows - reject if it doesn't\r\n  if (isNaN(iID)) {\r\n    output[\"error\"] = \"Error: please specify a Row ID\";\r\n  }\r\n  else if ((iID <= 0) || (iID > iLength)) {\r\n    output[\"error\"] = \"Error: Row ID \" + iID + \" does not exist\";\r\n  }\r\n  // Row ID exists - update the file\r\n  else {\r\n    output[\"msg\"] = await f_delete(fHScsv, iID);\r\n\r\n    // Fetch the file contents and place them in the output data.\r\n    const dataObj = await f_fileRead(fHScsv, 0);\r\n    output[\"result\"] = dataObj.data;\r\n  }\r\n}\r\ncatch (err) {\r\n  output[\"error\"] = String(err);\r\n}\r\n",
+            "comment": "DELETE - Remove CSV row data based on row ID passed. Returns an error if the row ID does not exist or is not a number."
+          }
+        }
+      ]
+    }
+  ]
+}

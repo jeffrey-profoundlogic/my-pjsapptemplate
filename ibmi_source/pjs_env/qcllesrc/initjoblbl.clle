@@ -1,0 +1,41 @@
+/*===========================================================================  +
+//                                                                             +
+//  Description: Initialize the Job                                            +
+//  Programmer.: Profound Logic - B.Rees                                       +
+//  Date.......: 10/12/2023                                                    +
+//                                                                             +
+//  Status: 0 - Library List not set - return to caller to handle              +
+//  Status: 1 - Library List was set - return to caller                        +
+//===========================================================================*/
+             PGM        PARM(&STATUS &PINSTNAME)
+             DCL        VAR(&STATUS) TYPE(*CHAR) LEN(1)
+             DCL        VAR(&PINSTNAME) TYPE(*CHAR) LEN(20)
+             DCL        VAR(&INSTNAME) TYPE(*CHAR) LEN(20)
+             DCL        VAR(&ISGENIE) TYPE(*LGL) LEN(1)
+
+             IF         COND(%PARMS() *GE 1) THEN(CHGVAR +
+                          VAR(&STATUS) VALUE('0'))
+             IF         COND(%PARMS() *GE 2) THEN(CHGVAR +
+                          VAR(&INSTNAME) VALUE(&PINSTNAME))
+
+             CALL       PGM(PUISETENV) PARM(&ISGENIE)
+
+             /* Set the Instance Name. */
+             IF         COND(&INSTNAME *NE ' ') THEN(DO)
+             ADDENVVAR  ENVVAR(PROFOUNDJS_ENVIRONMENT_NAME) +
+                          VALUE(&INSTNAME) REPLACE(*YES)
+             ENDDO
+
+             RMVENVVAR  ENVVAR(SETPJSENV)
+             MONMSG     MSGID(CPFA981)
+
+   /* If caller isGenie or passes InstanceName -- setup the JOB now */
+   /* Else return to caller */
+             IF         COND(&ISGENIE *OR &INSTNAME *NE ' ') THEN(DO)
+             CALL       PGM(SETPJSENV) PARM('Y')
+             IF         COND(%PARMS() *GE 1) THEN(CHGVAR +
+                          VAR(&STATUS) VALUE('1'))
+             ENDDO
+
+             ENDPGM
+

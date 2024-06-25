@@ -1,0 +1,40 @@
+     A*%%TS  SD  20231102  082058  PROFOUND1   REL-V7R4M0  5770-WDS
+     A*%%EC
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      INDARA
+     A          R ENVSFL                    SFL
+     A*%%TS  SD  20231102  082058  PROFOUND1   REL-V7R4M0  5770-WDS
+     A            OPT            1A  B  8  3VALUES('1' ' ')
+     A            SFENVID       36A  H
+     A            SFENVNAME     20A  O  8  6
+     A            SFENVDESC     50A  O  8 28
+     A          R ENVCTL                    SFLCTL(ENVSFL)
+     A*%%TS  SD  20231023  194523  PROFOUND1   REL-V7R4M0  5770-WDS
+     A                                      SFLSIZ(0015)
+     A                                      SFLPAG(0014)
+     A                                      CA03(03 'Exit')
+     A                                      OVERLAY
+     A N70                                  SFLDSP
+     A N70                                  SFLDSPCTL
+     A  70                                  SFLCLR
+     A N70                                  SFLEND
+     A                                  1 30'Environment Selection'
+     A                                      DSPATR(HI)
+     A                                  3  2'Search:'
+     A                                      DSPATR(HI)
+     A                                  7  2'Opt'
+     A                                      DSPATR(HI)
+     A            S1SEARCH      20A  B  3 12
+     A  40                                  DSPATR(RI)
+     A  40                                  DSPATR(PC)
+     A                                  1  3'PICKENVD'
+     A                                      COLOR(BLU)
+     A                                  5  3'Select Options:  1=Select'
+     A                                      COLOR(BLU)
+     A                                  7  6'Environment Name'
+     A                                      DSPATR(HI)
+     A                                  7 28'Environment Description'
+     A                                      DSPATR(HI)
+     A          R FKEY
+     A                                 23  5'F3=Exit'
+     A                                      COLOR(BLU)

@@ -1,0 +1,25 @@
+==== httpd.conf Apache Configurations for Atrium Exit Programs and Login Screen =====
+
+#### ADD THIS LINE ABOVE THE ERROR LOG LINE AROUND LINE 12   ###########
+# Load Proxy Related Modules
+IncludeOptional /WIASP/www/<pui-instance-name>/htdocs/profoundui/userdata/apache-directives/loadproxymodules.conf \
+Include /WIASP/www/<pui-instance-name>/htdocs/profoundui/userdata/apache-directives/macro.conf
+
+#### ADD THESE LINES ABOVE THE ERROR LOG LINE AROUND LINE 12   ############
+# Enable ProfoundUI Logging
+LogIOTrackTTFB ON
+LogFormat "%h %l %u %t \"%r\" %>s %b %{ms}T" timings
+CustomLog logs/access_log timings
+LogMaint logs/access_log 7 0
+
+# Enable PJSCALL/PJSPROXY logging
+SetEnv PROFOUNDJS_LOG 1
+SetEnv PROFOUNDJS_LOG_TYPE access
+
+# Include Macro to create virtual hosts for each developer
+IncludeOptional /WIASP/www/<pui-instance-name>/htdocs/profoundui/userdata/apache-directives/proxymacro.conf
+IncludeOptional /WIASP/www/<pui-instance-name>/htdocs/profoundui/userdata/apache-directives/<pui-instance-name>-developers.conf
+
+##### COMMENT OUT THE ATRIUM_LOGIN.HTML AND REPLACE WITH THE NEW ONE AROUND LINE 58
+Alias /profoundui/atrium /WIASP/www/<pui-instance-name>/htdocs/profoundui/userdata/html/elektrisola_login.html
+

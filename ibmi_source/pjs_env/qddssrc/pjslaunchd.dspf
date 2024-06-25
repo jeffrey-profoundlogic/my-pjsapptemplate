@@ -1,0 +1,41 @@
+     A*%%TS  SD  20230926  142321  JWILLIAMS   REL-V7R4M0  5770-WDS
+     A*%%EC
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      CA03(03 'EXIT')
+     A          R LAUNCH01
+     A*%%TS  SD  20230926  142321  JWILLIAMS   REL-V7R4M0  5770-WDS
+     A                                  1  2'LAUNCH01'
+     A                                      DSPATR(HI)
+     A                                  1 25'PJS Initial Launcher'
+     A                                  3  2'Command/Program Call  . :'
+     A            CMDPGM       128A  B  3 28
+     A                                  9  2'Addtl Libraries . :'
+     A            LIB1          10A  B  9 22
+     A            POS1          20A  B  9 34
+     A            LIB2          10A  B 10 22
+     A            POS2          20A  B 10 34
+     A            LIB3          10A  B 11 22
+     A            POS3          20A  B 11 34
+     A            LIB4          10A  B 12 22
+     A            POS4          20A  B 12 34
+     A            LIB5          10A  B 13 22
+     A            POS5          20A  B 13 34
+     A                                 24  3'F3=Exit'
+     A                                      COLOR(BLU)
+     A            LIB6          10A  B 14 22
+     A            LIB7          10A  B 15 22
+     A            LIB8          10A  B 16 22
+     A            LIB9          10A  B 17 22
+     A            LIB10         10A  B 18 22
+     A            POS6          20A  B 14 34
+     A            POS7          20A  B 15 34
+     A            POS8          20A  B 16 34
+     A            POS9          20A  B 17 34
+     A            POS10         20A  B 18 34
+     A          R LAUNCH02
+     A                                  1  2'LAUNCH02'
+     A                                      DSPATR(HI)
+     A                                 11 20'You are not authorized to run this-
+     A                                       option.'
+     A                                 24  3'F3=Exit'
+     A                                      COLOR(BLU)

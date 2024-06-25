@@ -1,0 +1,37 @@
+/*============================================================================*/
+/* PROGRAM NAME...: RTVJOBDLBL                                                */
+/* AUTHOR.........: Profound Logic - B.Rees                                   */
+/* DATE...........: 06/27/2023                                                */
+/* PCR #..........:                                                           */
+/* FUNCTION/DESC..: Retrieve the Library list from job description            */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
+/*   MODIFICATIONS:                                                           */
+/*----------------------------------------------------------------------------*/
+/* MOD#  PCR#    PGMR DATE      DESCRIPTION                                   */
+/*                                                                            */
+/*============================================================================*/
+             PGM  (&instance &usrlibl)
+
+             dcl &instance *char 20
+             dcl &usrlibl *char 2750
+
+
+             /* Saved the passed in instance name to a work variable */
+             addEnvVar 'PROFOUNDJS_INSTANCE_NAME' &instance replace(*Yes)
+
+
+             /* This is needed inorder to run the ChgLblJobd command */
+             /* addlible taatool  */
+             /* monmsg cpf0000    */
+
+
+             /* Call the procedure to setup the environment. */
+             call setpjsenv
+
+
+             /* Now, that the environment is setup, get the LIBL */
+             rtvjoba UsrLibl(&usrlibl)
+
+
+EXIT:        ENDPGM
